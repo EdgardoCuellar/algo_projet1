@@ -129,11 +129,14 @@ class Tableau:
             Si pièce i est placée sur le tableau, Pos_pieces[i] = [x,y] où x et y sont les coordonnées
             sur le tableau du coin en haut à gauche de la sous matrice de la variante ajoutée de la pièce
             """
-        self.hauteur = dimensions[0]
-        self.largeur = dimensions[1]
+        self.hauteur = dimensions[1]
+        self.largeur = dimensions[0]
         self.liste_pieces = liste_pieces
-        self.tableau = [["" for _ in range(self.hauteur)] for _ in range(self.largeur)]
-        self.Pos_pieces = []*len(liste_pieces)
+        self.tableau = [[" " for _ in range(self.hauteur)] for _ in range(self.largeur)]
+        self.Pos_pieces = []
+        for i in self.liste_pieces:
+            if i not in self.tableau:
+                self.Pos_pieces.append([])
 
     def ajouter_piece(self, index_piece, num_var, pos):
         """Ajoute si possible le polyomino self.liste_pieces[index_piece] à variante liste_variante[num_var]
@@ -143,7 +146,19 @@ class Tableau:
         - self.Pos_pieces[index_piece] = pos
         - self.tableau[i][j] = nom_piece là où la pièce est placée sur le tableau
         Output = True si la pièce a été ajoutée, False si l'ajout n'était pas possible"""
-        pass
+        test_add = True
+        pos_list = []
+        for pos_y, line in enumerate(self.liste_pieces[index_piece].liste_variantes.matrice):
+            for pos_x, case in enumerate(line):
+                if self.tableau[pos_y + pos[1]][pos_x + pos[0]] == " " and case == 1:
+                    pos_list.append((pos_x + pos[0], pos_y + pos[1]))
+                elif case == 1:
+                    test_add = False
+
+        if test_add:
+            self.Pos_pieces[index_piece] = pos
+            for pos_case in pos_list:
+                self.tableau[pos_case[1]][pos_case[0]] = self.liste_pieces[index_piece].nom
 
     def enlever_piece(self, index_piece):
         """Enlève la pièce à la position index_piece dans self.liste_piece du tableau.
