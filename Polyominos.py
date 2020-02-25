@@ -150,8 +150,8 @@ class Tableau:
         pos_list = []
         for pos_y, line in enumerate(self.liste_pieces[index_piece].liste_variantes.matrice):
             for pos_x, case in enumerate(line):
-                if self.tableau[pos_y + pos[1]][pos_x + pos[0]] == " " and case == 1:
-                    pos_list.append((pos_x + pos[0], pos_y + pos[1]))
+                if self.tableau[pos_y + pos[0]][pos_x + pos[1]] == " " and case == 1:
+                    pos_list.append((pos_x + pos[1], pos_y + pos[0]))
                 elif case == 1:
                     test_add = False
 
@@ -167,7 +167,12 @@ class Tableau:
         - self.tableau[i][j] = " " là où était la pièce
         Si la pièce n'est pas sur le tableau, cette fonction ne fait rien.
         Pas de output"""
-        pass
+        pos = self.Pos_pieces[index_piece]
+        for pos_y, line in enumerate(self.liste_pieces[index_piece].liste_variantes.matrice):
+            for pos_x, case in enumerate(line):
+                if self.tableau[pos_y + pos[0]][pos_x + pos[1]] != " " and case == 1:
+                    self.tableau[pos_y + pos[0]][pos_x + pos[1]] = " "
+        self.Pos_pieces[index_piece] = []
 
     def imprimer(self):
         """Imprime le tableau
@@ -192,32 +197,53 @@ def lire_fichier(nom_fichier):
     """ Input = string étant le nom du fichier
     Output = liste d'objets de classe Piece représentant les polyominos
     contenus dans le fichier"""
-    str_file = []
+    liste_pieces = []
     with open(nom_fichier + '.poly', 'r') as file:
         str_file = file.read().split("\n")
-
+    nb_p = int(str_file[0][0])
+    size = int(str_file[0][2])
+    for where in range(nb_p):
+        name = str_file[(where*(size+1))+1][0]
+        matrice = []
+        for pos_y in range(2, size+2):
+            line = []
+            for pos_x in range(0, size*2, 2):
+                line.append(str_file[(where*(size+1))+pos_y][pos_x])
+            matrice.append(line)
+        liste_pieces.append(Piece(name, matrice))
+    return liste_pieces
 
 def taille_totale_pieces(liste_pieces):
     """ Input = liste d'objet de classe Piece
     Output = somme de la taille de chaque pièce"""
-    pass
-
+    nb = 0
+    for piece in liste_pieces:
+        for line in piece.liste_variantes.matrice:
+            nb += line.count(1)
+    return nb
 
 def possibles_factorisations(nb):
     """Input: nb est un int
     Output = liste de tuples de taille 2 contenant toutes les factorisations possibles en
     2 facteurs de nb. Attention à ne pas les répéter 2 fois."""
-    pass
-
+    facto = []
+    for i in range(1, int(nb/2)):
+        for j in range(nb, 0, -1):
+            if i <= j and i * j == nb:
+                facto.append((i, j))
+    return facto
 
 def trouver_liste_solutions(nom_fichier):
     """Fonction principale qui trouve la liste des solutions.
     Output = liste d'objets de la classe Tableau qui contiennent les différentes solutions"""
-    pass
+    pieces = lire_fichier(nom_fichier)
+    solutions = []
+
+    return solutions
 
 if __name__ == '__main__':
-    pass
-    nom_fichier = sys.argv[1]
+    nom = lire_fichier("set_pieces_1")
+    # nom_fichier = sys.argv[1]
     # liste_solutions = trouver_liste_solutions(nom_fichier)
     # for tableau in liste_solutions:
     #     tableau.imprimer()

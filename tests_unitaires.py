@@ -390,7 +390,7 @@ def test_13():
 
 try:
     # test_number = int(sys.argv[1])
-    test_number = 8
+    test_number = 12
 except:
     print('Ce script prend 1 argument qui est le numéro de test')
 if test_number == 1:
