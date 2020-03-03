@@ -203,7 +203,7 @@ class Tableau:
 
     def lt_var(self):
         """
-
+        yo
         :return:
         """
         lt = []
