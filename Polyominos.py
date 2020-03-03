@@ -202,6 +202,10 @@ class Tableau:
         print(" " + "-" * self.largeur + " ")
 
     def lt_var(self):
+        """
+
+        :return:
+        """
         lt = []
         for var in self.liste_pieces:
             lt.append([0]*len(var.liste_variantes))
