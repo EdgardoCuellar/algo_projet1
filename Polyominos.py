@@ -108,8 +108,23 @@ class Piece:
         """Ajoute l'objet nouvelle_variante de la classe Ma_matrice à la liste self.liste_variantes
         si elle n'y est pas encore.
         Pas de output"""
-        if nouvelle_variante not in self.liste_variantes:
+        nouvelle_variante.translation_haut_gauche()
+        add = True
+        for lt in self.liste_variantes:
+            if lt.matrice == nouvelle_variante.matrice:
+                add = False
+        if add:
             self.liste_variantes.append(nouvelle_variante)
+
+    def posibilite(self):
+        rota = self.liste_variantes[0].rotation_horaire()
+        rota2 = Ma_matrice(rota.matrice).rotation_horaire()
+        rota3 = Ma_matrice(rota2.matrice).rotation_horaire()
+        self.ajout_variante(rota)
+        self.ajout_variante(rota2)
+        self.ajout_variante(rota3)
+        for lt in self.liste_variantes:
+            self.ajout_variante(lt.reflexion_axe_horizontal())
 
 
 class Tableau:
@@ -150,7 +165,7 @@ class Tableau:
         pos_list = []
         for pos_y, line in enumerate(self.liste_pieces[index_piece].liste_variantes[num_var].matrice):
             for pos_x, case in enumerate(line):
-                if self.tableau[pos_y + pos[0]][pos_x + pos[1]] == " " and case == 1:
+                if len(line) <= pos_y and self.tableau[pos_y + pos[0]][pos_x + pos[1]] == " " and case == 1:
                     pos_list.append((pos_x + pos[1], pos_y + pos[0]))
                 elif case == 1:
                     test_add = False
@@ -186,13 +201,28 @@ class Tableau:
             print("|" + content + "|")
         print(" " + "-" * self.largeur + " ")
 
+    def lt_var(self):
+        lt = []
+        for var in self.liste_pieces:
+            lt.append([0]*len(var.liste_variantes))
+        return lt
+
     def backtracking(self, profondeur):
         """Fonction de backtracking qui essaie de placer les pièces sur le tableau
         profondeur est un integer qui indique la profondeur dans le backtracking qui dans ce cas
         correspond à l'index de la pièce à ajouter à ce niveau du backtracking
         Output = True si une solution trouvée"""
         soluce = False
+        place = True
+        piece = 0
+        what_piece = self.lt_var()
+        where = (0, 0)
 
+        while place:
+            if not self.ajouter_piece(piece, what_piece[piece][0], where):
+                self.imprimer()
+            else:
+                self.imprimer()
         return soluce
 
 
@@ -214,7 +244,7 @@ def lire_fichier(nom_fichier):
                 line.append(int(str_file[(where * (size + 1)) + pos_y][pos_x]))
             matrice.append(line)
         liste_pieces.append(Piece(name, Ma_matrice(matrice)))
-    return liste_pieces
+    return liste_pieces, nb_p
 
 
 def taille_totale_pieces(liste_pieces):
@@ -242,8 +272,11 @@ def possibles_factorisations(nb):
 def trouver_liste_solutions(nom_fichier):
     """Fonction principale qui trouve la liste des solutions.
     Output = liste d'objets de la classe Tableau qui contiennent les différentes solutions"""
-    pieces = lire_fichier(nom_fichier)
+    pieces, nb_p = lire_fichier(nom_fichier)
     nb_piece = taille_totale_pieces(pieces)
+    for where in range(len(pieces)):
+        pieces[where].posibilite()
+
     nb_add = 0
     solutions = []
     soluce = False
@@ -252,7 +285,7 @@ def trouver_liste_solutions(nom_fichier):
         factos = possibles_factorisations(nb_piece + nb_add)
         for size in factos:
             tab = Tableau(size, pieces)
-            if tab.backtracking(1):
+            if tab.backtracking(nb_p):
                 solutions.append(tab)
                 soluce = True
         nb_add += 1
@@ -261,7 +294,7 @@ def trouver_liste_solutions(nom_fichier):
 
 
 if __name__ == '__main__':
-    noms = trouver_liste_solutions("set_pieces_2.poly")
+    noms = trouver_liste_solutions("set_pieces_1.poly")
     # nom_fichier = sys.argv[1]
     # liste_solutions = trouver_liste_solutions(nom_fichier)
     # for tableau in liste_solutions:
