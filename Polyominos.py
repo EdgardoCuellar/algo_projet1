@@ -144,10 +144,10 @@ class Tableau:
             Si pièce i est placée sur le tableau, Pos_pieces[i] = [x,y] où x et y sont les coordonnées
             sur le tableau du coin en haut à gauche de la sous matrice de la variante ajoutée de la pièce
             """
-        self.hauteur = dimensions[1]
-        self.largeur = dimensions[0]
+        self.hauteur = dimensions[0]
+        self.largeur = dimensions[1]
         self.liste_pieces = liste_pieces
-        self.tableau = [[" " for _ in range(self.hauteur)] for _ in range(self.largeur)]
+        self.tableau = [[" " for _ in range(self.largeur)] for _ in range(self.hauteur)]
         self.Pos_pieces = []
         for i in self.liste_pieces:
             if i not in self.tableau:
@@ -165,7 +165,8 @@ class Tableau:
         pos_list = []
         for pos_y, line in enumerate(self.liste_pieces[index_piece].liste_variantes[num_var].matrice):
             for pos_x, case in enumerate(line):
-                if len(line) <= pos_y and self.tableau[pos_y + pos[0]][pos_x + pos[1]] == " " and case == 1:
+                if self.hauteur > pos_y + pos[0] and self.largeur > pos_x + pos[1]\
+                        and self.tableau[pos_y + pos[0]][pos_x + pos[1]] == " " and case == 1:
                     pos_list.append((pos_x + pos[1], pos_y + pos[0]))
                 elif case == 1:
                     test_add = False
@@ -174,6 +175,7 @@ class Tableau:
             self.Pos_pieces[index_piece] = pos
             for pos_case in pos_list:
                 self.tableau[pos_case[1]][pos_case[0]] = self.liste_pieces[index_piece].nom
+
         return test_add
 
     def enlever_piece(self, index_piece):
@@ -183,11 +185,10 @@ class Tableau:
         - self.tableau[i][j] = " " là où était la pièce
         Si la pièce n'est pas sur le tableau, cette fonction ne fait rien.
         Pas de output"""
-        pos = self.Pos_pieces[index_piece]
-        for pos_y, line in enumerate(self.liste_pieces[index_piece].liste_variantes[0].matrice):
-            for pos_x, case in enumerate(line):
-                if self.tableau[pos_y + pos[0]][pos_x + pos[1]] != " " and case == 1:
-                    self.tableau[pos_y + pos[0]][pos_x + pos[1]] = " "
+        for pos_y in range(self.hauteur):
+            for pos_x in range(self.largeur):
+                if self.tableau[pos_y][pos_x] == self.liste_pieces[index_piece].nom:
+                    self.tableau[pos_y][pos_x] = " "
         self.Pos_pieces[index_piece] = []
 
     def imprimer(self):
@@ -207,9 +208,11 @@ class Tableau:
         :return:
         """
         lt = []
+        where = []
         for var in self.liste_pieces:
-            lt.append([0]*len(var.liste_variantes))
-        return lt
+            lt.append(len(var.liste_variantes))
+            where.append(0)
+        return lt, where
 
     def backtracking(self, profondeur):
         """Fonction de backtracking qui essaie de placer les pièces sur le tableau
@@ -219,14 +222,42 @@ class Tableau:
         soluce = False
         place = True
         piece = 0
-        what_piece = self.lt_var()
-        where = (0, 0)
+        max_var, where_var = self.lt_var()
+        where = [[0, 0] for _ in range(profondeur)]
 
         while place:
-            if not self.ajouter_piece(piece, what_piece[piece][0], where):
-                self.imprimer()
+            if not self.ajouter_piece(piece, where_var[piece], where[piece]):
+                if max_var[piece]-1 > where_var[piece]:
+                    where_var[piece] += 1
+                else:
+                    where_var[piece] = 0
+                    if where[piece][0] < self.hauteur-1:
+                        where[piece][0] += 1
+                    else:
+                        where[piece][0] = 0
+                        where[piece][1] += 1
+
+                    if where[piece][1] == self.largeur:
+                        where[piece] = [0, 0]
+                        piece -= 1
+                        self.enlever_piece(piece)
+                        if max_var[piece] - 1 > where_var[piece]:
+                            where_var[piece] += 1
+                        else:
+                            where_var[piece] = 0
+                            if where[piece][0] < self.hauteur - 1:
+                                where[piece][0] += 1
+                            else:
+                                where[piece][0] = 0
+                                where[piece][1] += 1
             else:
-                self.imprimer()
+                piece += 1
+
+            if piece < 0 or where[0][1] == self.largeur:
+                place = False
+            elif piece == profondeur:
+                place = False
+                soluce = True
         return soluce
 
 
@@ -298,8 +329,7 @@ def trouver_liste_solutions(nom_fichier):
 
 
 if __name__ == '__main__':
-    noms = trouver_liste_solutions("set_pieces_1.poly")
     # nom_fichier = sys.argv[1]
-    # liste_solutions = trouver_liste_solutions(nom_fichier)
-    # for tableau in liste_solutions:
-    #     tableau.imprimer()
+    liste_solutions = trouver_liste_solutions("set_pieces_2.poly")
+    for tableau in liste_solutions:
+        tableau.imprimer()
