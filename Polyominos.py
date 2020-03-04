@@ -1,5 +1,5 @@
 import sys
-
+import timeit
 
 class Ma_matrice:
     """Classe contenant une matrice sous forme de liste de listes et des méthodes qui performent
@@ -226,6 +226,7 @@ class Tableau:
         where = [[0, 0] for _ in range(profondeur)]
 
         while place:
+            print(self.Pos_pieces)
             if not self.ajouter_piece(piece, where_var[piece], where[piece]):
                 if max_var[piece]-1 > where_var[piece]:
                     where_var[piece] += 1
@@ -330,6 +331,13 @@ def trouver_liste_solutions(nom_fichier):
 
 if __name__ == '__main__':
     # nom_fichier = sys.argv[1]
-    liste_solutions = trouver_liste_solutions("set_pieces_2.poly")
+    start = timeit.default_timer()
+    liste_solutions = trouver_liste_solutions("set_pieces_1.poly")
     for tableau in liste_solutions:
         tableau.imprimer()
+    stop = timeit.default_timer()
+    print('\nTime: ', stop - start)
+
+    # TIMING set_pieces_1 = 15.5608 sec
+    # TIMING set_pieces_2 = 4.090447 sec
+    # TIMING tetra = 2.3411253 sec
