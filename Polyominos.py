@@ -1,5 +1,5 @@
 import sys
-import timeit
+
 
 class Ma_matrice:
     """Classe contenant une matrice sous forme de liste de listes et des méthodes qui performent
@@ -149,13 +149,15 @@ class Tableau:
         self.liste_pieces = liste_pieces
         self.tableau = [[" " for _ in range(self.largeur)] for _ in range(self.hauteur)]
         self.Pos_pieces = []
+        self.var = [0] * len(liste_pieces)
+        self.lt_var = self.create_lt_var()
         for i in self.liste_pieces:
             if i not in self.tableau:
-                self.Pos_pieces.append([])
+                self.Pos_pieces.append([0, 0])
 
     def ajouter_piece(self, index_piece, num_var, pos):
         """Ajoute si possible le polyomino self.liste_pieces[index_piece] à variante liste_variante[num_var]
-        dont le coin en haut à gauche de la matrice se trouve à la position pos (= liste de 2 integers) du tableau.
+        dont le coin en haut à gauche de la matrice se trouve à la position pos 😊 liste de 2 integers) du tableau.
         Tenez en compte le fait que certaines matrices de pièces peuvent contenir des lignes ou colonnes vides en bas ou à droite.
         Si l'ajout est possible, cette méthode modifie les variables:
         - self.Pos_pieces[index_piece] = pos
@@ -165,7 +167,7 @@ class Tableau:
         pos_list = []
         for pos_y, line in enumerate(self.liste_pieces[index_piece].liste_variantes[num_var].matrice):
             for pos_x, case in enumerate(line):
-                if self.hauteur > pos_y + pos[0] and self.largeur > pos_x + pos[1]\
+                if self.hauteur > pos_y + pos[0] and self.largeur > pos_x + pos[1] \
                         and self.tableau[pos_y + pos[0]][pos_x + pos[1]] == " " and case == 1:
                     pos_list.append((pos_x + pos[1], pos_y + pos[0]))
                 elif case == 1:
@@ -181,7 +183,7 @@ class Tableau:
     def enlever_piece(self, index_piece):
         """Enlève la pièce à la position index_piece dans self.liste_piece du tableau.
         Cette méthode modifie les variables:
-        - self.Pos_pieces[index_piece] = []
+
         - self.tableau[i][j] = " " là où était la pièce
         Si la pièce n'est pas sur le tableau, cette fonction ne fait rien.
         Pas de output"""
@@ -189,7 +191,6 @@ class Tableau:
             for pos_x in range(self.largeur):
                 if self.tableau[pos_y][pos_x] == self.liste_pieces[index_piece].nom:
                     self.tableau[pos_y][pos_x] = " "
-        self.Pos_pieces[index_piece] = []
 
     def imprimer(self):
         """Imprime le tableau
@@ -202,64 +203,50 @@ class Tableau:
             print("|" + content + "|")
         print(" " + "-" * self.largeur + " ")
 
-    def lt_var(self):
+    def create_lt_var(self):
         """
         yo
         :return:
         """
         lt = []
-        where = []
         for var in self.liste_pieces:
             lt.append(len(var.liste_variantes))
-            where.append(0)
-        return lt, where
+        return lt
 
     def backtracking(self, profondeur):
         """Fonction de backtracking qui essaie de placer les pièces sur le tableau
         profondeur est un integer qui indique la profondeur dans le backtracking qui dans ce cas
         correspond à l'index de la pièce à ajouter à ce niveau du backtracking
         Output = True si une solution trouvée"""
-        soluce = False
-        place = True
-        piece = 0
-        max_var, where_var = self.lt_var()
-        where = [[0, 0] for _ in range(profondeur)]
-
-        while place:
-            print(self.Pos_pieces)
-            if not self.ajouter_piece(piece, where_var[piece], where[piece]):
-                if max_var[piece]-1 > where_var[piece]:
-                    where_var[piece] += 1
+        if profondeur == len(self.liste_pieces):
+            return True
+        elif profondeur < 0 or self.Pos_pieces[0][1] == self.largeur:
+            return False
+        else:
+            var = 0
+            while True:
+                if self.ajouter_piece(profondeur, var, self.Pos_pieces[profondeur]):
+                    if self.backtracking(profondeur + 1):
+                        return True
                 else:
-                    where_var[piece] = 0
-                    if where[piece][0] < self.hauteur-1:
-                        where[piece][0] += 1
+                    if self.lt_var[profondeur] - 1 > var:
+                        var += 1
                     else:
-                        where[piece][0] = 0
-                        where[piece][1] += 1
-
-                    if where[piece][1] == self.largeur:
-                        where[piece] = [0, 0]
-                        piece -= 1
-                        self.enlever_piece(piece)
-                        if max_var[piece] - 1 > where_var[piece]:
-                            where_var[piece] += 1
+                        var = 0
+                        if self.Pos_pieces[profondeur][0] < self.hauteur - 1:
+                            self.Pos_pieces[profondeur][0] += 1
                         else:
-                            where_var[piece] = 0
-                            if where[piece][0] < self.hauteur - 1:
-                                where[piece][0] += 1
-                            else:
-                                where[piece][0] = 0
-                                where[piece][1] += 1
-            else:
-                piece += 1
-
-            if piece < 0 or where[0][1] == self.largeur:
-                place = False
-            elif piece == profondeur:
-                place = False
-                soluce = True
-        return soluce
+                            self.Pos_pieces[profondeur][0] = 0
+                            self.Pos_pieces[profondeur][1] += 1
+                            if self.Pos_pieces[profondeur][1] == self.largeur:
+                                self.Pos_pieces[profondeur] = [0, 0]
+                                self.enlever_piece(profondeur - 1)
+                                if self.Pos_pieces[profondeur - 1][0] < self.hauteur - 1:
+                                    self.Pos_pieces[profondeur - 1][0] += 1
+                                else:
+                                    self.Pos_pieces[profondeur - 1][0] = 0
+                                    self.Pos_pieces[profondeur - 1][1] += 1
+                                return False
 
 
 def lire_fichier(nom_fichier):
@@ -269,8 +256,9 @@ def lire_fichier(nom_fichier):
     liste_pieces = []
     with open(nom_fichier, 'r') as file:
         str_file = file.read().split("\n")
-    nb_p = int(str_file[0][0])
-    size = int(str_file[0][2])
+    str_infos = str_file[0].split(" ")
+    nb_p = int(str_infos[0])
+    size = int(str_infos[1])
     for where in range(nb_p):
         name = str_file[(where * (size + 1)) + 1][0]
         matrice = []
@@ -280,7 +268,7 @@ def lire_fichier(nom_fichier):
                 line.append(int(str_file[(where * (size + 1)) + pos_y][pos_x]))
             matrice.append(line)
         liste_pieces.append(Piece(name, Ma_matrice(matrice)))
-    return liste_pieces, nb_p
+    return liste_pieces
 
 
 def taille_totale_pieces(liste_pieces):
@@ -308,7 +296,7 @@ def possibles_factorisations(nb):
 def trouver_liste_solutions(nom_fichier):
     """Fonction principale qui trouve la liste des solutions.
     Output = liste d'objets de la classe Tableau qui contiennent les différentes solutions"""
-    pieces, nb_p = lire_fichier(nom_fichier)
+    pieces = lire_fichier(nom_fichier)
     nb_piece = taille_totale_pieces(pieces)
     for where in range(len(pieces)):
         pieces[where].posibilite()
@@ -321,7 +309,7 @@ def trouver_liste_solutions(nom_fichier):
         factos = possibles_factorisations(nb_piece + nb_add)
         for size in factos:
             tab = Tableau(size, pieces)
-            if tab.backtracking(nb_p):
+            if tab.backtracking(0):
                 solutions.append(tab)
                 soluce = True
         nb_add += 1
@@ -330,14 +318,7 @@ def trouver_liste_solutions(nom_fichier):
 
 
 if __name__ == '__main__':
-    # nom_fichier = sys.argv[1]
-    start = timeit.default_timer()
-    liste_solutions = trouver_liste_solutions("set_pieces_1.poly")
+    nom_fichier = sys.argv[1]
+    liste_solutions = trouver_liste_solutions(nom_fichier)
     for tableau in liste_solutions:
         tableau.imprimer()
-    stop = timeit.default_timer()
-    print('\nTime: ', stop - start)
-
-    # TIMING set_pieces_1 = 15.5608 sec
-    # TIMING set_pieces_2 = 4.090447 sec
-    # TIMING tetra = 2.3411253 sec
