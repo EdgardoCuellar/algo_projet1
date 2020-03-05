@@ -1,3 +1,13 @@
+# -*- coding: utf-8 -*-
+"""
+Projet 1 d'algorithmique:
+Un algo de backtracking qui place les pieces(polyominos) sur un tableau en essayant
+d'avoir l'air la plus petite possible, fonctionne avec des set de pieces.
+Created on Tuesday February 12 11:10:37 2020
+@author: Edgardo Cuellar Sanchez
+N° de matricule : 496612
+Mail : Edgardo.Cuellar.Sanchez@ulb.be
+"""
 import sys
 
 
@@ -8,7 +18,9 @@ class Ma_matrice:
     def __init__(self, liste):
         """Input: liste de listes contenant la matrice
         Doit contenir la variable self. = liste
-        La matrice doit être recentrée lors de l'initialisation de l'objet en utilisant translation_haut_gauche(self)"""
+        self.size = la taille de la liste
+        La matrice doit être recentrée lors de l'initialisation de l'objet en utilisant
+        translation_haut_gauche(self)"""
         self.matrice = liste
         self.size = len(liste)
         self.translation_haut_gauche()
@@ -25,7 +37,7 @@ class Ma_matrice:
         """Output = objet de la classe Ma_matrice dont la matrice est la rotation horaire de
         90 degrés de self.matrice. La nouvelle matrice doit également être translatée en haut à
         gauche en utilisant translation_haut_gauche(self).
-        Attention, self.matrice reste inchangée."""
+        self.matrice reste inchangée."""
         new_m = []
         for pos_x in range(self.size):
             line = []
@@ -35,29 +47,29 @@ class Ma_matrice:
         return Ma_matrice(new_m)
 
     def reflexion_axe_horizontal(self):
-        """Output = objet de la classe Ma_matrice dont la matrice est la réflexion sur l'axe horiontal
-        de self.matrice. La nouvelle matrice doit également être translatée en haut à
+        """Output = objet de la classe Ma_matrice dont la matrice est la réflexion sur l'axe
+        horiontal de self.matrice. La nouvelle matrice doit également être translatée en haut à
         gauche en utilisant translation_haut_gauche(self).
-        Attention, self.matrice reste inchangée."""
+        self.matrice reste inchangée."""
         new_m = []
         for pos_y in range(self.size - 1, -1, -1):
             new_m.append(self.matrice[pos_y])
         return Ma_matrice(new_m)
 
-    def translation_haut(self, n):
+    def translation_haut(self, nb_lines):
         """Fonction interne qui translate circulairement vers le haut self.matrice par n lignes
         Pas de output"""
-        for _ in range(n):
+        for _ in range(nb_lines):
             for pos_y in range(self.size):
                 if pos_y != self.size - 1:
                     self.matrice[pos_y] = self.matrice[pos_y + 1]
                 else:
                     self.matrice[pos_y] = [0] * self.size
 
-    def translation_gauche(self, n):
+    def translation_gauche(self, nb_lines):
         """Fonction interne qui translate circulairement vers la gauche self.matrice par n colonnes
         Pas de output"""
-        for _ in range(n):
+        for _ in range(nb_lines):
             for pos_y in range(self.size):
                 for pos_x in range(self.size):
                     if pos_x != self.size - 1:
@@ -68,8 +80,8 @@ class Ma_matrice:
     def translation_haut_gauche(self):
         """Fonction interne qui recentre self.matrice de telle manière que ni la première colonne
         ni la première ligne ne contiennent que des 0.
-        Cette opération est nécessaire pour ne pas avoir en double certaines variantes d'une pièce
-        après rotations/réflexions dans la classe Piece.
+        Cette opération est nécessaire pour ne pas avoir en double certaines variantes d'une
+        pièce après rotations/réflexions dans la classe Piece.
         Pas de output"""
         # Translation vers le haut
         nb_up = 0
@@ -117,6 +129,10 @@ class Piece:
             self.liste_variantes.append(nouvelle_variante)
 
     def posibilite(self):
+        """
+        Créée toute les variantes possibles de la matrice et l'ajoute à liste_variantes.
+        :return: None
+        """
         rota = self.liste_variantes[0].rotation_horaire()
         rota2 = Ma_matrice(rota.matrice).rotation_horaire()
         rota3 = Ma_matrice(rota2.matrice).rotation_horaire()
@@ -128,11 +144,12 @@ class Piece:
 
 
 class Tableau:
-    """Classe définissant un tableau"""
+    """Classe définissant un tableau où il faut placer les polyominos"""
 
     def __init__(self, dimensions, liste_pieces):
-        """Input: dimensions = tuple de 2 integers contenant la hauteur = dimensions[0] et la largeur du tableau = dimensions[1]
-                  liste_pieces = liste d'objets de la classe piece
+        """Input: dimensions = tuple de 2 integers contenant la hauteur = dimensions[0] et la
+                largeur du tableau = dimensions[1]
+                liste_pieces = liste d'objets de la classe piece
             Les variables suivantes doivent être contenues dans la classe:
             - liste_pieces
             - hauteur = hauteur du tableau
@@ -141,8 +158,8 @@ class Tableau:
             Lorsque le tableau est initialisé, il est vide et ne contient que des espaces.
             - Pos_pieces = liste de même longueur que liste_pieces.
             Si pièce i n'est pas placée sur le tableau, Pos_pieces[i] = []
-            Si pièce i est placée sur le tableau, Pos_pieces[i] = [x,y] où x et y sont les coordonnées
-            sur le tableau du coin en haut à gauche de la sous matrice de la variante ajoutée de la pièce
+            sur le tableau du coin en haut à gauche de la sous matrice de la variante
+            ajoutée de la pièce
             """
         self.hauteur = dimensions[0]
         self.largeur = dimensions[1]
@@ -157,14 +174,15 @@ class Tableau:
 
     def ajouter_piece(self, index_piece, num_var, pos):
         """Ajoute si possible le polyomino self.liste_pieces[index_piece] à variante liste_variante[num_var]
-        dont le coin en haut à gauche de la matrice se trouve à la position pos 😊 liste de 2 integers) du tableau.
-        Tenez en compte le fait que certaines matrices de pièces peuvent contenir des lignes ou colonnes vides en bas ou à droite.
+        dont le coin en haut à gauche de la matrice se trouve à la position
+        pos (liste de 2 integers) du tableau.
         Si l'ajout est possible, cette méthode modifie les variables:
         - self.Pos_pieces[index_piece] = pos
         - self.tableau[i][j] = nom_piece là où la pièce est placée sur le tableau
         Output = True si la pièce a été ajoutée, False si l'ajout n'était pas possible"""
         test_add = True
         pos_list = []
+        # Check si il est possible de placer la piece dans le tableau
         for pos_y, line in enumerate(self.liste_pieces[index_piece].liste_variantes[num_var].matrice):
             for pos_x, case in enumerate(line):
                 if self.hauteur > pos_y + pos[0] and self.largeur > pos_x + pos[1] \
@@ -172,7 +190,7 @@ class Tableau:
                     pos_list.append((pos_x + pos[1], pos_y + pos[0]))
                 elif case == 1:
                     test_add = False
-
+        # Place la piece dans le tableau
         if test_add:
             self.Pos_pieces[index_piece] = pos
             for pos_case in pos_list:
@@ -183,7 +201,6 @@ class Tableau:
     def enlever_piece(self, index_piece):
         """Enlève la pièce à la position index_piece dans self.liste_piece du tableau.
         Cette méthode modifie les variables:
-
         - self.tableau[i][j] = " " là où était la pièce
         Si la pièce n'est pas sur le tableau, cette fonction ne fait rien.
         Pas de output"""
@@ -205,48 +222,54 @@ class Tableau:
 
     def create_lt_var(self):
         """
-        yo
-        :return:
+        Créée une liste avec toute la longeur de liste variante de chaque piece.
+        pour alléger le code et optimiser un peu celui ci.
+        :return: une liste avec toute la longeur de liste variante de chaque piece
         """
         lt = []
         for var in self.liste_pieces:
             lt.append(len(var.liste_variantes))
         return lt
 
+    def advanced(self, profondeur):
+        """
+        Fait avancer de 1 la piece dans le tableau, d'abord à la vertical puis à l'horizontal.
+        Modifie self.Pos_pieces
+        :param profondeur: L'index de la piece qu'on est entrain d'essayer
+        :return: None
+        """
+        if self.Pos_pieces[profondeur][0] < self.hauteur - 1:
+            self.Pos_pieces[profondeur][0] += 1
+        else:
+            self.Pos_pieces[profondeur][0] = 0
+            self.Pos_pieces[profondeur][1] += 1
+
     def backtracking(self, profondeur):
-        """Fonction de backtracking qui essaie de placer les pièces sur le tableau
+        """Fonction recurcive de backtracking qui essaie de placer les pièces sur le tableau
         profondeur est un integer qui indique la profondeur dans le backtracking qui dans ce cas
         correspond à l'index de la pièce à ajouter à ce niveau du backtracking
         Output = True si une solution trouvée"""
-        if profondeur == len(self.liste_pieces):
+        if profondeur == len(self.liste_pieces):  # Condition de sortie quand Solution trouvée
             return True
-        elif profondeur < 0 or self.Pos_pieces[0][1] == self.largeur:
+        elif profondeur < 0 or self.Pos_pieces[0][1] == self.largeur:  # Condition quand impossible
             return False
         else:
-            var = 0
+            var = 0  # L'index de la variante de liste_pieces
             while True:
                 if self.ajouter_piece(profondeur, var, self.Pos_pieces[profondeur]):
-                    if self.backtracking(profondeur + 1):
+                    if self.backtracking(profondeur + 1):  # Récurcivité et incremente la profondeur
                         return True
                 else:
-                    if self.lt_var[profondeur] - 1 > var:
+                    if self.lt_var[profondeur] - 1 > var:  # Test une autre varainte de la piece
                         var += 1
                     else:
                         var = 0
-                        if self.Pos_pieces[profondeur][0] < self.hauteur - 1:
-                            self.Pos_pieces[profondeur][0] += 1
-                        else:
-                            self.Pos_pieces[profondeur][0] = 0
-                            self.Pos_pieces[profondeur][1] += 1
-                            if self.Pos_pieces[profondeur][1] == self.largeur:
-                                self.Pos_pieces[profondeur] = [0, 0]
-                                self.enlever_piece(profondeur - 1)
-                                if self.Pos_pieces[profondeur - 1][0] < self.hauteur - 1:
-                                    self.Pos_pieces[profondeur - 1][0] += 1
-                                else:
-                                    self.Pos_pieces[profondeur - 1][0] = 0
-                                    self.Pos_pieces[profondeur - 1][1] += 1
-                                return False
+                        self.advanced(profondeur)  # Fait avancer la piece dans le tableau
+                        if self.Pos_pieces[profondeur][1] == self.largeur:  # Si impossible
+                            self.Pos_pieces[profondeur] = [0, 0]
+                            self.enlever_piece(profondeur - 1)
+                            self.advanced(profondeur-1) # Fait avancer la piece-1 dans le tableau
+                            return False
 
 
 def lire_fichier(nom_fichier):
@@ -257,8 +280,8 @@ def lire_fichier(nom_fichier):
     with open(nom_fichier, 'r') as file:
         str_file = file.read().split("\n")
     str_infos = str_file[0].split(" ")
-    nb_p = int(str_infos[0])
-    size = int(str_infos[1])
+    nb_p = int(str_infos[0])  # Le nombre de polyominos dans le tableau
+    size = int(str_infos[1])  # La taille des matrices qu'il contient
     for where in range(nb_p):
         name = str_file[(where * (size + 1)) + 1][0]
         matrice = []
@@ -284,7 +307,7 @@ def taille_totale_pieces(liste_pieces):
 def possibles_factorisations(nb):
     """Input: nb est un int
     Output = liste de tuples de taille 2 contenant toutes les factorisations possibles en
-    2 facteurs de nb. Attention à ne pas les répéter 2 fois."""
+    2 facteurs de nb."""
     facto = []
     for i in range(1, int(nb / 2)):
         for j in range(nb, 0, -1):
@@ -299,7 +322,7 @@ def trouver_liste_solutions(nom_fichier):
     pieces = lire_fichier(nom_fichier)
     nb_piece = taille_totale_pieces(pieces)
     for where in range(len(pieces)):
-        pieces[where].posibilite()
+        pieces[where].posibilite()  # Créée toute les variantes possibles de la piece
 
     nb_add = 0
     solutions = []
@@ -312,13 +335,12 @@ def trouver_liste_solutions(nom_fichier):
             if tab.backtracking(0):
                 solutions.append(tab)
                 soluce = True
-        nb_add += 1
+        nb_add += 1  # Incremente le nombre de block de 1
 
     return solutions
 
 
 if __name__ == '__main__':
-    nom_fichier = sys.argv[1]
-    liste_solutions = trouver_liste_solutions(nom_fichier)
+    liste_solutions = trouver_liste_solutions(sys.argv[1])
     for tableau in liste_solutions:
         tableau.imprimer()
